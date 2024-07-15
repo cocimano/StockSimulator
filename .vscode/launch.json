@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "VectorEstado",
+            "request": "launch",
+            "mainClass": "org.example.VectorEstado",
+            "projectName": "StockManagementSimulator"
+        },
+        {
+            "type": "java",
             "name": "Current File",
             "request": "launch",
             "mainClass": "${file}"
@@ -15,9 +22,7 @@
             "name": "StockManagementSimulator",
             "request": "launch",
             "mainClass": "org.example.StockManagementSimulator",
-            "projectName": "StockManagementSimulator",
-            //"vmArgs": "--module-path \"C:/Program Files/Java/jdk-17/lib\" --add-modules javafx.controls"
-            
+            "projectName": "StockManagementSimulator"
         }
     ]
 }
