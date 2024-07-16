@@ -90,13 +90,15 @@ public class VectorEstado {
     private static int calcularDemandaAcumulada(int demanda, int demandaAcumulada, int huboPedidoAyer, int diaActual) {
         if (diaActual == 1) {
             return demanda; // En el día 1, la demanda acumulada es igual a la demanda
+        } else  if (diaActual == 2) {
+            return demanda + demandaAcumulada; // En el día 2, la demanda acumulada es la demanda más la demanda acumulada del día anterior
         } else {
             return huboPedidoAyer == 1 ? demanda : demanda + demandaAcumulada; // Reiniciar la demanda acumulada si hubo pedido el día anterior
         }
     }
 
     // Método para calcular la cantidad a pedir
-    private static int calcularCantidadAPedir(int stock, int cantidadAPedir, String pol, int huboPedido, int diaActual, int demandaAcumuladaB) {
+    private static int calcularCantidadAPedir(int cantidadAPedir, String pol, int huboPedido, int diaActual, int demandaAcumuladaB) {
         if (pol == "A") {
             if (huboPedido == 0) {
                 return 0; // No se pide si no hubo pedido
@@ -190,7 +192,8 @@ public class VectorEstado {
 
         // Guardado del dia de llegada para poder calcular el stock en el dia de llegada
         int diaLlegadaReal = 0;
-        int cantidadAPedirRealBEsDemandaAcumulada = 0;
+        int cantidadAPedirReal = 0;
+        int demandaAcumuladaReal = 0;
     
         // Generación de valores aleatorios para los vectores
         for (int dias = 0; dias < (cantidadDiasSimulacion + 1); dias++) {
@@ -228,17 +231,23 @@ public class VectorEstado {
                 if (pido == 1) {
                     diaLlegadaReal = diaLlegada;
                 }
-                
-                stock = calcularStock((int) vectorAnterior[6], demanda, cantidadAPedirDada, dias, diaLlegadaReal);
+
                 demandaAcumulada = calcularDemandaAcumulada(demanda, (int) vectorAnterior[8], (int) vectorAnterior[7], dias);
 
-                // Debo guardar la demanda acumulada para poder calcular la cantidad a pedir de la política B
-                if (politica == "B" && pido == 1) {
-                    cantidadAPedirRealBEsDemandaAcumulada = demandaAcumulada;
+                // Debo guardar la demanda acumulada para poder calcular la cantidad a pedir
+                if (pido == 1) {
+                    demandaAcumuladaReal = demandaAcumulada;
                 }
 
-                cantidadAPedir = calcularCantidadAPedir(stock, cantidadAPedirDada, politica, pido, dias, cantidadAPedirRealBEsDemandaAcumulada);
+                cantidadAPedir = calcularCantidadAPedir(cantidadAPedirDada, politica, pido, dias, demandaAcumuladaReal);
+
+                // Debo guardar la cantidad a pedir para poder calcular el stock en el día de llegada
+                if (pido == 1) {
+                    cantidadAPedirReal = cantidadAPedir;
+                }
+
                 costoDeOrdenar = calcularCostoDeOrdenar(cantidadAPedir, pido);
+                stock = calcularStock((int) vectorAnterior[6], demanda, cantidadAPedirReal, dias, diaLlegadaReal);
                 costoDeMantener = calcularCostoDeMantener(stock);
                 costoPorFaltante = calcularCostoPorFaltante((int) vectorAnterior[6], demanda, cantidadAPedirDada, dias, diaLlegadaReal);
                 costoTotal = calcularCostoTotal(costoDeOrdenar, costoDeMantener, costoPorFaltante);
@@ -291,7 +300,7 @@ public class VectorEstado {
 
 
     public static void main(String[] args) {
-       double[][] matriz = generadorVectoresParImpar(300, 100, 30, 15, "A");
+       double[][] matriz = generadorVectoresParImpar(300, 20, 20, 25, "A");
        GeneradorExcel.crearExcel("SimulacionPoliticaA.xls", matriz);
        for (int fila = 0; fila < matriz.length; fila++) {
            System.out.print("Fila " + fila + ": [ ");
