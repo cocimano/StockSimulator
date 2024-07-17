@@ -142,7 +142,7 @@ public class VectorEstado {
 
     // Método para calcular el costo de mantener
     private static double calcularCostoDeMantener(int stock) {
-        return stock * 5; // Costo de mantener por unidad (Parametrizar si es necesario)
+        return (stock * 5) * 10 ; // Costo de mantener por unidad (Parametrizar si es necesario)
     }
 
     // Método para calcular el costo por faltante
@@ -151,7 +151,7 @@ public class VectorEstado {
             return 0; // No hay costo por faltante si llega el pedido
         } else {
             if (stockAnterior < demanda) {
-                return (demanda - stockAnterior) * 9; // Costo por faltante por unidad (Parametrizar si es necesario)
+                return ((demanda - stockAnterior) * 9) * 10; // Costo por faltante por unidad (Parametrizar si es necesario)
             } else {
                 return 0; // No hay costo por faltante si el stock es suficiente
             }
@@ -286,12 +286,12 @@ public class VectorEstado {
             // Asignar el vector actual a la matriz directamente usando el índice 'dias'
             matriz[dias] = vectorActual;
 
-            if (dias == 0) {
-                // En el día 0, no hay valores anteriores, solo se muestra el stock inicial
-                System.out.println("Día: " + (int) vectorActual[0] + ", Stock inicial: " + (int) vectorActual[6]);
-            } else {
-                System.out.println("Día: " + (int) vectorActual[0] + ", RND1: " + vectorActual[1] + ", Demanda: " + (int) vectorActual[2] + ", RND2: " + vectorActual[3] + ", Días de demora: " + (int) vectorActual[4] + ", Día de llegada: " + (int) vectorActual[5] + ", Stock: " + (int) vectorActual[6] + ", Pido: " + (int) vectorActual[7] + ", Demanda acumulada: " + (int) vectorActual[8] + ", Cantidad a pedir: " + (int) vectorActual[9] + ", Costo de ordenar: " + vectorActual[10] + ", Costo de mantener: " + vectorActual[11] + ", Costo por faltante: " + vectorActual[12] + ", Costo total: " + vectorActual[13] + ", Costo acumulado: " + vectorActual[14] + ", Costo promedio: " + vectorActual[15]);
-            }
+            // if (dias == 0) {
+            //     // En el día 0, no hay valores anteriores, solo se muestra el stock inicial
+            //     System.out.println("Día: " + (int) vectorActual[0] + ", Stock inicial: " + (int) vectorActual[6]);
+            // } else {
+            //     System.out.println("Día: " + (int) vectorActual[0] + ", RND1: " + vectorActual[1] + ", Demanda: " + (int) vectorActual[2] + ", RND2: " + vectorActual[3] + ", Días de demora: " + (int) vectorActual[4] + ", Día de llegada: " + (int) vectorActual[5] + ", Stock: " + (int) vectorActual[6] + ", Pido: " + (int) vectorActual[7] + ", Demanda acumulada: " + (int) vectorActual[8] + ", Cantidad a pedir: " + (int) vectorActual[9] + ", Costo de ordenar: " + vectorActual[10] + ", Costo de mantener: " + vectorActual[11] + ", Costo por faltante: " + vectorActual[12] + ", Costo total: " + vectorActual[13] + ", Costo acumulado: " + vectorActual[14] + ", Costo promedio: " + vectorActual[15]);
+            // }
         }
 
 
@@ -299,15 +299,15 @@ public class VectorEstado {
     }
 
 
-    public static void main(String[] args) {
-       double[][] matriz = generadorVectoresParImpar(300, 20, 20, 25, "A");
-       GeneradorExcel.crearExcel("SimulacionPoliticaA.xls", matriz);
-       for (int fila = 0; fila < matriz.length; fila++) {
-           System.out.print("Fila " + fila + ": [ ");
-           for (double value : matriz[fila]) {
-               System.out.print(value + " ");
-           }
-           System.out.println("]");
-       }
-    }
+    // public static void main(String[] args) {
+    //    double[][] matriz = generadorVectoresParImpar(300, 20, 20, 25, "B");
+    //    GeneradorExcel.crearExcel("SimulacionPoliticaB.xls", matriz);
+    //    for (int fila = 0; fila < matriz.length; fila++) {
+    //        System.out.print("Fila " + fila + ": [ ");
+    //        for (double value : matriz[fila]) {
+    //            System.out.print(value + " ");
+    //        }
+    //        System.out.println("]");
+    //    }
+    // }
 }
