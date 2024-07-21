@@ -6,6 +6,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class GeneradorExcel {
     public static void crearExcel(String nombreArchivo, double[][] datos) {
+        @SuppressWarnings("resource")
         Workbook wb = new XSSFWorkbook();
         FileOutputStream fileOut = null;
 

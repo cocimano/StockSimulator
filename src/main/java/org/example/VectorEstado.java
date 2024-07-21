@@ -181,8 +181,7 @@ public class VectorEstado {
 
     // Método para generar los vectores de estado par e impar
     public static double[][] generadorVectoresParImpar(int cantidadDiasSimulacion, int stockInicial, int diasEntrePedidos, int cantidadAPedirDada, String politica) {
-        Random random = new Random();
-
+        
         // Creación de los vectores
         double[] vectorPar = new double[16];
         double[] vectorImpar = new double[16];

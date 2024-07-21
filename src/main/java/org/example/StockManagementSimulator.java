@@ -21,6 +21,11 @@ public class StockManagementSimulator extends Application {
     static Integer diasEntrePedidos = null; //~ cada cuántos días se pide
     static Integer cantidadAPedir = null; //~ tamaño del pedido
 
+    public static void main(String[] args) {
+        launch(); //usar mvn clean javafx:run o mvn javafx:run
+        //Application.launch(StockManagementSimulator.class, args);
+    }
+
     @Override
     public void start(Stage primaryStage) {
     primaryStage.setTitle("Simulador de Gestión de Stock");
@@ -99,14 +104,14 @@ public class StockManagementSimulator extends Application {
 
     buttonEvaluar.setOnAction(e -> {
         if (costoPromedio[0] == 0 || costoPromedio[1] == 0) {
-            mostrarAlerta("Error", "Primero debe simular las políticas A y B." + costoPromedio[0] + " " + costoPromedio[1]);
+            mostrarAlerta("Error", "Primero debe simular las políticas A y B. \n" + "A: $" + costoPromedio[0] + " " + "B: $" + costoPromedio[1], "ERROR");
         } else {
             if (costoPromedio[0] < costoPromedio[1]) {
-                mostrarAlerta("Resultado", "La política A es más económica que la B. \nCosto promedio A: $" + costoPromedio[0] + ", Costo promedio B: $" + costoPromedio[1]);
+                mostrarAlerta("Resultado", "La política A es más económica que la B. \nCosto promedio A: $" + costoPromedio[0] + ", Costo promedio B: $" + costoPromedio[1], "INFORMACION");
             } else if (costoPromedio[0] > costoPromedio[1]) {
-                mostrarAlerta("Resultado", "La política B es más económica que la A. \nCosto promedio B: $" + costoPromedio[1] + ", Costo promedio A: $" + costoPromedio[0]);
+                mostrarAlerta("Resultado", "La política B es más económica que la A. \nCosto promedio B: $" + costoPromedio[1] + ", Costo promedio A: $" + costoPromedio[0], "INFORMACION");
             } else {
-                mostrarAlerta("Resultado", "Ambas políticas tienen el mismo costo promedio. \nCosto promedio: $" + costoPromedio[0]);
+                mostrarAlerta("Resultado", "Ambas políticas tienen el mismo costo promedio. \nCosto promedio: $" + costoPromedio[0], "INFORMACION");
             }
         }
     });
@@ -137,12 +142,13 @@ public class StockManagementSimulator extends Application {
 
     primaryStage.setScene(scene);
     primaryStage.show();
-    }
+}
+
 
     // Validar que los datos de entrada sean numeros, no nulos, y que sean mayores a 0
     private boolean validarEntradaNumerica(TextField campo, String nombreCampo) {
         if (campo.getText() == null || campo.getText().isEmpty()) {
-            mostrarAlerta("Error de validación", "El campo '" + nombreCampo + "' no puede ser nulo o estar vacío.");
+            mostrarAlerta("Error de validación", "El campo '" + nombreCampo + "' no puede ser nulo o estar vacío.", "ERROR");
             return false;
         }
         try {
@@ -152,19 +158,35 @@ public class StockManagementSimulator extends Application {
             }
             return true; // Validación exitosa
         } catch (NumberFormatException e) {
-            mostrarAlerta("Error de validación", "El campo '" + nombreCampo + "' debe ser numérico.");
+            mostrarAlerta("Error de validación", "El campo '" + nombreCampo + "' debe ser numérico.", "ERROR");
             return false;
         } catch (IllegalArgumentException e) {
-            mostrarAlerta("Error de validación", e.getMessage());
+            mostrarAlerta("Error de validación", e.getMessage(), "ERROR");
             return false;
         }
     }
 
-    private void mostrarAlerta(String titulo, String mensaje) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(titulo);
+    private void mostrarAlerta(String titulo, String mensaje, String tipoAlerta) {
+        if (tipoAlerta.equals("ERROR")) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle(titulo);
+            alert.setHeaderText(null);
+            alert.setContentText(mensaje);
+            alert.showAndWait();
+        } else if (tipoAlerta.equals("INFORMACION")) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle(titulo);
+            alert.setHeaderText(null);
+            alert.setContentText(mensaje);
+            alert.showAndWait();
+        }
+    }
+
+    private void ventanaTablaCreadaExitosamente() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Tabla creada exitosamente");
         alert.setHeaderText(null);
-        alert.setContentText(mensaje);
+        alert.setContentText("La tabla ha sido creada exitosamente.");
         alert.showAndWait();
     }
 
@@ -183,6 +205,7 @@ public class StockManagementSimulator extends Application {
 
         // Llamar al método crearExcel de GeneradorExcel
         GeneradorExcel.crearExcel(nombreArchivo, matriz);
+        ventanaTablaCreadaExitosamente();
 
     }
 
@@ -196,10 +219,9 @@ public class StockManagementSimulator extends Application {
 
         // Llamar al método crearExcel de GeneradorExcel
         GeneradorExcel.crearExcel(nombreArchivo, matriz);
+        ventanaTablaCreadaExitosamente();
     }
 
-    public static void main(String[] args) {
-        launch(); //usar mvn clean javafx:run o mvn javafx:run
-    }
+    
 }
 

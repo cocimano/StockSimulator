@@ -22,7 +22,8 @@
             "name": "StockManagementSimulator",
             "request": "launch",
             "mainClass": "org.example.StockManagementSimulator",
-            "projectName": "StockManagementSimulator"
+            "projectName": "StockManagementSimulator",
+            "vmArgs": "--module-path \"C:/Program Files/Java/javafx-sdk-22.0.2/lib\" --add-modules javafx.controls,javafx.fxml"
         }
     ]
 }
