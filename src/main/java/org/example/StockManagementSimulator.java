@@ -3,6 +3,7 @@ package org.example;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -17,6 +18,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 
@@ -40,9 +42,11 @@ public class StockManagementSimulator extends Application {
     Label titulo = new Label("Simulación de Gestión de Stock");
     titulo.setAlignment(Pos.CENTER); // Alinea el texto del label al centro
     titulo.setMaxWidth(Double.MAX_VALUE); // Permite que el label se expanda para centrarse correctamente
+    titulo.setFont(new Font("Cambria", 23)); // Cambiar el tamaño de la fuente
 
     // X=N Cantidad de días = Cantidad de filas generadas. Debe soportar hasta 100000.
-    Label cantidadDiasSimulacionLabel = new Label("Ingrese la cantidad de días a simular");
+    Label cantidadDiasSimulacionLabel = new Label("Ingrese la cantidad de días a simular (hasta 100.000):");
+    cantidadDiasSimulacionLabel.setFont(new Font("Cambria", 14)); 
     TextField cantidadDiasSimulacionInput = new TextField();
     cantidadDiasSimulacionInput.setPromptText("Ej.: 300");
     cantidadDiasSimulacionInput.setText(cantidadDiasSimulacion == null ? "" : Integer.toString(cantidadDiasSimulacion));
@@ -50,6 +54,7 @@ public class StockManagementSimulator extends Application {
 
     // Stock inicial = X0
     Label stockInicialLabel = new Label("Ingrese el stock inicial:");
+    stockInicialLabel.setFont(new Font("Cambria", 14)); 
     TextField stockInicialInput = new TextField();
     stockInicialInput.setPromptText("Ej.: 20");
     stockInicialInput.setText(stockInicial == null ? "" : Integer.toString(stockInicial));
@@ -57,6 +62,7 @@ public class StockManagementSimulator extends Application {
 
     // Dias entre pedidos = N
     Label diasEntrePedidosLabel = new Label("Ingrese la cantidad de días entre pedidos:");
+    diasEntrePedidosLabel.setFont(new Font("Cambria", 14));
     TextField diasEntrePedidosInput = new TextField();
     diasEntrePedidosInput.setPromptText("Ej.: 10");
     diasEntrePedidosInput.setText(diasEntrePedidos == null ? "" : Integer.toString(diasEntrePedidos));
@@ -64,8 +70,9 @@ public class StockManagementSimulator extends Application {
 
     // Cantidad a pedir = Q
     Label cantidadAPedirLabel = new Label("Ingrese la cantidad a pedir:");
+    cantidadAPedirLabel.setFont(new Font("Cambria", 14));
     TextField cantidadAPedirInput = new TextField();
-    cantidadAPedirInput.setPromptText("Ej.: 100");
+    cantidadAPedirInput.setPromptText("Ej.: 15");
     cantidadAPedirInput.setText(cantidadAPedir == null ? "" : Integer.toString(cantidadAPedir));
     cantidadAPedirInput.textProperty().addListener((observable, oldValue, newValue) -> cantidadAPedir = Integer.parseInt(newValue)); // Actualiza la variable cantidadAPedir
     
@@ -223,50 +230,46 @@ public class StockManagementSimulator extends Application {
     private double[] costoPromedio = new double[2]; // Guardar el costo promedio de las simulaciones A y B
     private String nombreArchivo; // Nombre del archivo de Excel generado
 
-    // Método para simular la política A o B
     public void simulatePolicy(String pol) {
         final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        final AtomicBoolean excelCreado = new AtomicBoolean(false); // Almacenar el estado de excelCreado
+
         // Crear un nuevo hilo para ejecutar la simulación
         Thread simulationThread = new Thread(() -> {
+            double[][] matriz;
             if (pol.equals("A")) {
-                // Datos del vector de estado
-                double[][] matriz = VectorEstado.generadorVectoresParImpar(cantidadDiasSimulacion, stockInicial, diasEntrePedidos, cantidadAPedir, "A");
-                costoPromedio[0] = matriz[matriz.length - 1][15]; // Guardar el costo promedio de la simulación
+                matriz = VectorEstado.generadorVectoresParImpar(cantidadDiasSimulacion, stockInicial, diasEntrePedidos, cantidadAPedir, "A");
+                costoPromedio[0] = matriz[matriz.length - 1][15];
                 nombreArchivo = "SimulacionPoliticaA.xls";
-                GeneradorExcel.crearExcel(nombreArchivo, matriz);
-            } else if (pol.equals("B")) {
-                // Datos del vector de estado
-                double[][] matriz = VectorEstado.generadorVectoresParImpar(cantidadDiasSimulacion, stockInicial, diasEntrePedidos, cantidadAPedir, "B");
-                costoPromedio[1] = matriz[matriz.length - 1][15]; // Guardar el costo promedio de la simulación
+            } else {
+                matriz = VectorEstado.generadorVectoresParImpar(cantidadDiasSimulacion, stockInicial, diasEntrePedidos, cantidadAPedir, "B");
+                costoPromedio[1] = matriz[matriz.length - 1][15];
                 nombreArchivo = "SimulacionPoliticaB.xls";
-                GeneradorExcel.crearExcel(nombreArchivo, matriz);
             }
+            excelCreado.set(GeneradorExcel.crearExcel(nombreArchivo, matriz)); // Actualizar el estado de excelCreado
 
-            // Cierra la ventana de la progressBar y detiene el scheduler una vez que la simulación ha terminado
             Platform.runLater(() -> {
-                progressBarStage.close();
-                ventanaTablaCreadaExitosamente();
+                if (excelCreado.get()) { // Mostrar la ventana de éxito solo si excelCreado es true
+                    progressBarStage.close();
+                    ventanaTablaCreadaExitosamente();
+                }
                 if (scheduler != null) {
-                    scheduler.shutdown(); 
+                    scheduler.shutdown();
                 }
             });
         });
 
-
         // Inicia la simulación
         simulationThread.start();
 
-        // Programa una tarea para mostrar la progressBar después de 5 segundos si la simulación aún está en ejecución
+        // Programa una tarea para mostrar la progressBar después de 5 segundos si la simulación aún está en ejecución y excelCreado es true
         scheduler.schedule(() -> {
-            if (simulationThread.isAlive()) {
+            if (simulationThread.isAlive() && !excelCreado.get()) {
                 Platform.runLater(() -> {
                     showProgressBar();
                 });
             }
         }, 5, TimeUnit.SECONDS);
-
-
-
     }
 
     

@@ -2,13 +2,13 @@ package org.example;
 
 import java.io.*;
 
-//import javax.swing.JOptionPane;
+import javax.swing.JOptionPane;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class GeneradorExcel {
-    public static void crearExcel(String nombreArchivo, double[][] datos) {
+    public static boolean crearExcel(String nombreArchivo, double[][] datos) {
         @SuppressWarnings("resource")
         Workbook wb = new XSSFWorkbook();
         FileOutputStream fileOut = null;
@@ -20,7 +20,7 @@ public class GeneradorExcel {
             Sheet sheet = wb.createSheet("Tabla Montecarlo");
 
             // Crear títulos de columnas
-            String[] columnTitles = {"Día", "RND1", "Demanda", "RND2", "Días Demora", "Día Llegada", "Stock", "¿Pido?", "Demanda Acumulada", "¿Cuánto?", "KO", "KM", "KS", "Costo Total", "Costo Acumulado", "Costo Promedio"};
+            String[] columnTitles = {"Día", "RND1", "Demanda", "RND2", "Días Demora", "Día Llegada", "Stock", "¿Pido?", "Demanda ++", "¿Cuánto?", "Costo Orden", "Costo Mantenimiento", "Costo Faltante", "Costo Total", "Costo Acumulado", "Costo Promedio"};
 
             // Crear la fila de títulos y aplicar estilo
             Row titleRow = sheet.createRow(0);
@@ -81,12 +81,12 @@ public class GeneradorExcel {
             System.out.println("Tabla creada exitosamente");
 
             wb.write(fileOut);
-
+            return true;
         } catch (IOException e) {
             // No se puede abrir o cerrar el archivo
             System.out.println("No se puede generar nuevamente el excel mientras el archivo está abierto. Cierrelo antes de volver a generar");
-            //JOptionPane.showMessageDialog(null, "No se puede generar nuevamente el excel mientras el archivo está abierto. Cierrelo antes de volver a generar", "Error", JOptionPane.ERROR_MESSAGE);
-            //return;
+            JOptionPane.showMessageDialog(null, "No se puede generar nuevamente el excel mientras el archivo está abierto. Cierrelo antes de volver a generar", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
         } finally {
             if (fileOut != null) {
                 try {
