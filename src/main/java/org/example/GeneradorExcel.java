@@ -1,6 +1,9 @@
 package org.example;
 
 import java.io.*;
+
+//import javax.swing.JOptionPane;
+
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -82,6 +85,8 @@ public class GeneradorExcel {
         } catch (IOException e) {
             // No se puede abrir o cerrar el archivo
             System.out.println("No se puede generar nuevamente el excel mientras el archivo está abierto. Cierrelo antes de volver a generar");
+            //JOptionPane.showMessageDialog(null, "No se puede generar nuevamente el excel mientras el archivo está abierto. Cierrelo antes de volver a generar", "Error", JOptionPane.ERROR_MESSAGE);
+            //return;
         } finally {
             if (fileOut != null) {
                 try {

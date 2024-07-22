@@ -1,14 +1,21 @@
 package org.example;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -69,12 +76,13 @@ public class StockManagementSimulator extends Application {
     Button buttonSalir = new Button("Salir");
     Button buttonEvaluar = new Button("Evaluar");
 
+
     buttonA.setOnAction(e -> {
         if (validarEntradaNumerica(cantidadDiasSimulacionInput, "Cantidad de días a simular") &&
             validarEntradaNumerica(stockInicialInput, "Stock inicial") &&
             validarEntradaNumerica(diasEntrePedidosInput, "Días entre pedidos") &&
             validarEntradaNumerica(cantidadAPedirInput, "Cantidad a pedir")) {
-            simulatePolicyA(); // Proceder solo si todas las validaciones son exitosas
+            simulatePolicy("A"); // Proceder solo si todas las validaciones son exitosas
         }
     });
 
@@ -83,7 +91,7 @@ public class StockManagementSimulator extends Application {
             validarEntradaNumerica(stockInicialInput, "Stock inicial") &&
             validarEntradaNumerica(diasEntrePedidosInput, "Días entre pedidos") &&
             validarEntradaNumerica(cantidadAPedirInput, "Cantidad a pedir")) {
-            simulatePolicyB(); // Proceder solo si todas las validaciones son exitosas
+            simulatePolicy("B"); // Proceder solo si todas las validaciones son exitosas
         }
     });
 
@@ -190,36 +198,75 @@ public class StockManagementSimulator extends Application {
         alert.showAndWait();
     }
 
+    // Método para mostrar la progressBar en una ventana
+    Stage progressBarStage = new Stage();
 
-    // Array para guardar el costoPromedio de la simulación
-    private double[] costoPromedio = new double[2];
+    public void showProgressBar() {
+        ProgressBar progressBar = new ProgressBar();
+        progressBar.setProgress(ProgressBar.INDETERMINATE_PROGRESS);
 
+        Label messageLabel = new Label("Simulación en progreso...");
 
-    private void simulatePolicyA() {
-        // Datos del vector de estado
-        double[][] matriz = VectorEstado.generadorVectoresParImpar(cantidadDiasSimulacion, stockInicial, diasEntrePedidos, cantidadAPedir, "A");
-        costoPromedio[0] = matriz[matriz.length - 1][15]; // Guardar el costo promedio de la simulación
+        StackPane root = new StackPane();
+        root.getChildren().addAll(progressBar, messageLabel);
 
-        // Nombre del archivo Excel a crear
-        String nombreArchivo = "SimulacionPoliticaA.xls";
-
-        // Llamar al método crearExcel de GeneradorExcel
-        GeneradorExcel.crearExcel(nombreArchivo, matriz);
-        ventanaTablaCreadaExitosamente();
-
+        StackPane.setAlignment(messageLabel, Pos.CENTER);
+        StackPane.setMargin(messageLabel, new Insets(50, 0, 0, 0)); // Ajustar según necesidad
+        
+        Scene scene = new Scene(root, 200, 200);
+        progressBarStage.setScene(scene);
+        progressBarStage.show();
     }
 
-    private void simulatePolicyB() {
-        // Datos del vector de estado
-        double[][] matriz = VectorEstado.generadorVectoresParImpar(cantidadDiasSimulacion, stockInicial, diasEntrePedidos, cantidadAPedir, "B");
-        costoPromedio[1] = matriz[matriz.length - 1][15]; // Guardar el costo promedio de la simulación
 
-        // Nombre del archivo Excel a crear
-        String nombreArchivo = "SimulacionPoliticaB.xls";
 
-        // Llamar al método crearExcel de GeneradorExcel
-        GeneradorExcel.crearExcel(nombreArchivo, matriz);
-        ventanaTablaCreadaExitosamente();
+    private double[] costoPromedio = new double[2]; // Guardar el costo promedio de las simulaciones A y B
+    private String nombreArchivo; // Nombre del archivo de Excel generado
+
+    // Método para simular la política A o B
+    public void simulatePolicy(String pol) {
+        final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        // Crear un nuevo hilo para ejecutar la simulación
+        Thread simulationThread = new Thread(() -> {
+            if (pol.equals("A")) {
+                // Datos del vector de estado
+                double[][] matriz = VectorEstado.generadorVectoresParImpar(cantidadDiasSimulacion, stockInicial, diasEntrePedidos, cantidadAPedir, "A");
+                costoPromedio[0] = matriz[matriz.length - 1][15]; // Guardar el costo promedio de la simulación
+                nombreArchivo = "SimulacionPoliticaA.xls";
+                GeneradorExcel.crearExcel(nombreArchivo, matriz);
+            } else if (pol.equals("B")) {
+                // Datos del vector de estado
+                double[][] matriz = VectorEstado.generadorVectoresParImpar(cantidadDiasSimulacion, stockInicial, diasEntrePedidos, cantidadAPedir, "B");
+                costoPromedio[1] = matriz[matriz.length - 1][15]; // Guardar el costo promedio de la simulación
+                nombreArchivo = "SimulacionPoliticaB.xls";
+                GeneradorExcel.crearExcel(nombreArchivo, matriz);
+            }
+
+            // Cierra la ventana de la progressBar y detiene el scheduler una vez que la simulación ha terminado
+            Platform.runLater(() -> {
+                progressBarStage.close();
+                ventanaTablaCreadaExitosamente();
+                if (scheduler != null) {
+                    scheduler.shutdown(); 
+                }
+            });
+        });
+
+
+        // Inicia la simulación
+        simulationThread.start();
+
+        // Programa una tarea para mostrar la progressBar después de 5 segundos si la simulación aún está en ejecución
+        scheduler.schedule(() -> {
+            if (simulationThread.isAlive()) {
+                Platform.runLater(() -> {
+                    showProgressBar();
+                });
+            }
+        }, 5, TimeUnit.SECONDS);
+
+
+
     }
 
     
