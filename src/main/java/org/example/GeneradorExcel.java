@@ -58,11 +58,15 @@ public class GeneradorExcel {
                 for (int columna = 0; columna < datos[fila].length; columna++) {
                     Cell cell = row.createCell(columna);
 
-                    //Verificar si estamos en la columna "RND2", Días Demora o "Día Llegada" (columna 3, 4 y 5, cuarta, quinta y sexta columna)
-                    
-                    // Verificar si estamos en la columna "¿Pido?" (columna 7, octava columna)
-                    if (columna == 7) {
-                        // Transformar 1 y 0 en "SI" y "NO"
+                    if (columna == 3 || columna == 4 || columna == 5) {
+                        // Para las columnas 3, 4 y 5, transformar 0 en cadena vacía
+                        if (datos[fila][columna] == 0.0) {
+                            cell.setCellValue("");
+                        } else {
+                            cell.setCellValue(datos[fila][columna]);
+                        }
+                    } else if (columna == 7) {
+                        // Transformar 1 y 0 en "SI" y "NO" para la columna "¿Pido?"
                         String valor = datos[fila][columna] == 1.0 ? "SI" : "NO";
                         cell.setCellValue(valor);
                     } else {
