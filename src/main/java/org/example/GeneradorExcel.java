@@ -57,6 +57,8 @@ public class GeneradorExcel {
                 Row row = sheet.createRow(fila + 1);
                 for (int columna = 0; columna < datos[fila].length; columna++) {
                     Cell cell = row.createCell(columna);
+
+                    //Verificar si estamos en la columna "RND2", Días Demora o "Día Llegada" (columna 3, 4 y 5, cuarta, quinta y sexta columna)
                     
                     // Verificar si estamos en la columna "¿Pido?" (columna 7, octava columna)
                     if (columna == 7) {

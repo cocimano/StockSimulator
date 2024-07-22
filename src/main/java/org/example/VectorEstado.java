@@ -221,10 +221,18 @@ public class VectorEstado {
 
                 rnd1 = calcularRandom();
                 demanda = calcularDemanda(rnd1);
-                rnd2 = calcularRandom();
                 pido = determinarSiPedir(dias, diasEntrePedidos);
-                diasDemora = calcularDiasDeDemora(rnd2, pido);
-                diaLlegada = calcularDiaDeLlegada(dias, diasDemora, pido);
+
+                // Si no se pide, los valores de rnd2, días de demora y día de llegada son 0
+                if (pido == 0) {
+                    rnd2 = 0.0;
+                    diasDemora = 0;
+                    diaLlegada = 0;
+                } else {
+                    rnd2 = calcularRandom();
+                    diasDemora = calcularDiasDeDemora(rnd2, pido);
+                    diaLlegada = calcularDiaDeLlegada(dias, diasDemora, pido);
+                }
 
                 // Debo guardar el dia de llegada para poder calcular el stock en el día de llegada
                 if (pido == 1) {
